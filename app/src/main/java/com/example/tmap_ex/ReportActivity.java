@@ -18,7 +18,6 @@ import androidx.appcompat.widget.Toolbar;
 import com.skt.Tmap.TMapGpsManager;
 import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapView;
-
 public class ReportActivity extends AppCompatActivity {
 
     private Context mContext = null;
