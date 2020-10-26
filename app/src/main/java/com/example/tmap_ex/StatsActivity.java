@@ -1,5 +1,6 @@
 package com.example.tmap_ex;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -58,6 +59,7 @@ public class StatsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stats_activity);
 
+        Intent intent = getIntent();
         new BackgroundTask().execute();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);

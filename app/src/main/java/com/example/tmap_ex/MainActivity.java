@@ -44,6 +44,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
@@ -102,13 +103,21 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
                 switch (item.getItemId()) {
                     case R.id.menu1:
-                        Toast.makeText(mContext, "메뉴1~",Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, "지도",Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(intent);
                     case R.id.menu2:
-                        Toast.makeText(mContext, "메뉴2~",Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, "신고",Toast.LENGTH_LONG).show();
+                        Intent intent2 = new Intent(getApplicationContext(), ReportActivity.class);
+                        startActivity(intent2);
                     case R.id.menu3:
-                        Toast.makeText(mContext, "statistic",Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, "통계",Toast.LENGTH_LONG).show();
+                        Intent intent3 = new Intent(getApplicationContext(), StatsActivity.class);
+                        startActivity(intent3);
                 }
 
                 drawerLayout.closeDrawer(navigationView);
@@ -120,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
         ConstraintLayout mapViewLayout = (ConstraintLayout) findViewById(R.id.map_view_layout);
         Button rp_btn = (Button)findViewById(R.id.report_btn);
-        Button stats_btn = (Button)findViewById(R.id.stats_btn);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -145,23 +153,19 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
         tmapview.setTrackingMode(true);
         mapViewLayout.addView(tmapview);
-
         rp_btn.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ReportActivity.class);
-                intent.putExtra("cur_latitude",currentPoint.getLatitude());
-                intent.putExtra("cur_longitude",currentPoint.getLongitude());
-                startActivityForResult(intent, 1);
-            }
-        });
-        stats_btn.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), StatsActivity.class);
-                startActivity(intent);
+                Intent intent4 = new Intent(getApplicationContext(), ReportActivity.class);
+                try{
+                    intent4.putExtra("cur_latitude",currentPoint.getLatitude());
+                    Log.d("type", String.valueOf(currentPoint.getLatitude()));
+                    intent4.putExtra("cur_longitude",currentPoint.getLongitude());
+                    startActivityForResult(intent4, 1);
+                }catch (Exception e){
+                    Toast.makeText(getApplicationContext(),"현재위치를 활성화해주세요.", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
