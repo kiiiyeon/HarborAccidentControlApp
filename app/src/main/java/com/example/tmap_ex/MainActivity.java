@@ -9,27 +9,22 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.PointF;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
-import com.skt.Tmap.TMapCircle;
 import com.skt.Tmap.TMapGpsManager;
+import com.skt.Tmap.TMapMarkerItem;
+import com.skt.Tmap.TMapPOIItem;
 import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapView;
-import com.skt.Tmap.TmapAuthentication;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,6 +35,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements TMapGpsManager.onLocationChangedCallback {
 
@@ -52,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     private static int mMarkerID;
     private String mJsonString;
     private static final String TAG_JSON="webnautes";
+    ArrayList<TMapMarkerItem> arr = new ArrayList<>();
 
     @Override
     public void onLocationChange(Location location){
@@ -86,6 +83,22 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         tmapview.setMapType(TMapView.MAPTYPE_STANDARD);
         tmapview.setLanguage(TMapView.LANGUAGE_KOREAN);
 
+        tmapview.setOnClickListenerCallBack(new TMapView.OnClickListenerCallback() {
+            @Override
+            public boolean onPressEvent(ArrayList<TMapMarkerItem> arrayList, ArrayList<TMapPOIItem> arrayList1, TMapPoint tMapPoint, PointF pointF) {
+                return false;
+            }
+
+            @Override
+            public boolean onPressUpEvent(ArrayList<TMapMarkerItem> arrayList, ArrayList<TMapPOIItem> arrayList1, TMapPoint tMapPoint, PointF pointF) {
+                for (TMapMarkerItem item : arrayList) {
+                    Toast.makeText(getApplicationContext(), item.getID(), Toast.LENGTH_SHORT).show();
+                }
+                Log.d("EndTest", "EndTest");
+                return false;
+            }
+        });
+
         tmapgps = new TMapGpsManager(MainActivity.this);
         tmapgps.setMinTime(1000);
         tmapgps.setMinDistance(5);
@@ -103,7 +116,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                 Intent intent = new Intent(getApplicationContext(), ReportActivity.class);
                 intent.putExtra("cur_latitude",currentPoint.getLatitude());
                 intent.putExtra("cur_longitude",currentPoint.getLongitude());
-                //startActivityForResult(intent, 1);
                 startActivity(intent);
             }
         });
@@ -222,23 +234,30 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                 int state = Integer.parseInt(item.getString("state"));
                 if(state == 0){ //처리중
                     TMapPoint reportPoint = new TMapPoint(latitude, longitude);
-                    TMapCircle tcircle = new TMapCircle();
-                    tcircle.setCenterPoint(reportPoint);
-                    tcircle.setRadius(5);
-                    tcircle.setAreaColor(Color.RED);
-                    tcircle.setAreaAlpha(80);
-                    tcircle.setRadiusVisible(true);
-                    tmapview.addTMapCircle("circle"+i, tcircle);
+                    TMapMarkerItem markerItem = new TMapMarkerItem();
+                    markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
+                    markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
+                    markerItem.setCanShowCallout(true);
+                    markerItem.setCalloutTitle("처리중");
+                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+                    Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.red_marker);
+                    markerItem.setIcon(markerIcon);
+                    tmapview.addMarkerItem("marker"+i, markerItem); // 지도에 마커 추가
+                    markerItem.setID("marker"+i);
+                    arr.add(markerItem);
                 }
                 else{ //해결됨
                     TMapPoint reportPoint = new TMapPoint(latitude, longitude);
-                    TMapCircle tcircle = new TMapCircle();
-                    tcircle.setCenterPoint(reportPoint);
-                    tcircle.setRadius(5);
-                    tcircle.setAreaColor(Color.BLUE);
-                    tcircle.setAreaAlpha(80);
-                    tcircle.setRadiusVisible(true);
-                    tmapview.addTMapCircle("circle"+i, tcircle);
+                    TMapMarkerItem markerItem = new TMapMarkerItem();
+                    markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
+                    markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
+                    markerItem.setCanShowCallout(true);
+                    markerItem.setCalloutTitle("해결됨");
+                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+                    Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.blue_marker);
+                    markerItem.setIcon(markerIcon);
+                    tmapview.addMarkerItem("marker"+i, markerItem); // 지도에 마커 추가
+                    arr.add(markerItem);
                 }
             }
 
