@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu1"
+        android:title="사고현황"
+        android:icon="@drawable/ic_baseline_home_24"/>
+
+    <item android:id="@+id/menu2"
+        android:title="신고하기"
+        android:icon="@drawable/ic_baseline_report_24"/>
+
+    <item android:id="@+id/menu3"
+        android:title="신고통계"
+        android:icon="@drawable/ic_baseline_bar_chart_24"/>
+
+</menu>
