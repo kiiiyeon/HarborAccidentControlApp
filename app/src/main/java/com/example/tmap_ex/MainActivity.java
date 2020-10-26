@@ -16,6 +16,8 @@ import android.graphics.PointF;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.graphics.PointF;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -102,22 +104,12 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
             @Override
             public boolean onPressUpEvent(ArrayList<TMapMarkerItem> arrayList, ArrayList<TMapPOIItem> arrayList1, TMapPoint tMapPoint, PointF pointF) {
                 for (TMapMarkerItem item : arrayList) {
-                    Toast.makeText(getApplicationContext(), item.getID(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), item.getID(), Toast.LENGTH_SHORT).show();
                 }
                 Log.d("EndTest", "EndTest");
                 return false;
             }
         });
-
-
-
-        //마커 아이콘 설정
-        //Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.download);
-        //markerItem2.setIcon(markerIcon);
-
-
-
-
 
         tmapgps = new TMapGpsManager(MainActivity.this);
         tmapgps.setMinTime(1000);
@@ -136,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                 Intent intent = new Intent(getApplicationContext(), ReportActivity.class);
                 intent.putExtra("cur_latitude",currentPoint.getLatitude());
                 intent.putExtra("cur_longitude",currentPoint.getLongitude());
-                //startActivityForResult(intent, 1);
                 startActivity(intent);
             }
         });
@@ -164,7 +155,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
             progressDialog = ProgressDialog.show(MainActivity.this,
                     "Please Wait", null, true, true);
         }
-
 
 
         @Override
@@ -242,8 +232,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
         }
     }
-
-    //위도 경도 이상있는지
 
 
     private class GetGasData extends AsyncTask<String, Void, String> {
@@ -337,7 +325,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     }
 
 
-
     private void showResult(){
         try {
             JSONObject jsonObject = new JSONObject(mJsonString);
@@ -347,7 +334,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
                 JSONObject item = jsonArray.getJSONObject(i);
 
-
                 double latitude = Double.parseDouble(item.getString("latitude"));
                 double longitude = Double.parseDouble(item.getString("longitude"));
                 int state = Integer.parseInt(item.getString("state"));
@@ -356,20 +342,27 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                     TMapMarkerItem markerItem = new TMapMarkerItem();
                     markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
                     markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
+                    markerItem.setCanShowCallout(true);
+                    markerItem.setCalloutTitle("처리중");
+                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+                    Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.red_marker);
+                    markerItem.setIcon(markerIcon);
                     tmapview.addMarkerItem("marker"+i, markerItem); // 지도에 마커 추가
                     markerItem.setID("marker"+i);
                     arr.add(markerItem);
-
                 }
                 else{ //해결됨
                     TMapPoint reportPoint = new TMapPoint(latitude, longitude);
                     TMapMarkerItem markerItem = new TMapMarkerItem();
                     markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
                     markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
-                    tmapview.addMarkerItem("marker", markerItem); // 지도에 마커 추가
-                    markerItem.setID("marker"+i);
+                    markerItem.setCanShowCallout(true);
+                    markerItem.setCalloutTitle("해결됨");
+                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+                    Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.blue_marker);
+                    markerItem.setIcon(markerIcon);
+                    tmapview.addMarkerItem("marker"+i, markerItem); // 지도에 마커 추가
                     arr.add(markerItem);
-                    tmapview.addMarkerItem("marker"+i, markerItem);
                 }
             }
 
