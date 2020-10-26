@@ -23,6 +23,10 @@
         </activity>
         <activity android:name=".ReportActivity"/>
         <activity android:name=".MainActivity"/>
+        <activity android:name=".StatsActivity"/>
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false"/>
     </application>
 
 </manifest>

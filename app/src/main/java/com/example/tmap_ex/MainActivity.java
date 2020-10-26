@@ -3,7 +3,6 @@ package com.example.tmap_ex;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
-
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -19,6 +18,7 @@ import android.location.LocationManager;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.AsyncTask;
+import androidx.appcompat.widget.Toolbar;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -26,7 +26,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
@@ -34,6 +33,7 @@ import com.skt.Tmap.TMapCircle;
 import com.skt.Tmap.TMapGpsManager;
 import com.skt.Tmap.TMapMarkerItem;
 import com.skt.Tmap.TMapPOIItem;
+import com.skt.Tmap.TMapData;
 import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapView;
 import com.skt.Tmap.TmapAuthentication;
@@ -48,10 +48,31 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.logging.LogManager;
+
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
+
+
 
 public class MainActivity extends AppCompatActivity implements TMapGpsManager.onLocationChangedCallback {
 
     private Context mContext = null;
+    private Toolbar toolbar;
     private boolean m_bTrackingMode = true;
     private TMapGpsManager tmapgps = null;
     private TMapView tmapview = null;
@@ -61,6 +82,12 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     private String mJsonString;
     private static final String TAG_JSON="webnautes";
     ArrayList<TMapMarkerItem> arr = new ArrayList<>();
+    private TMapPoint reportPoint = null;
+    private double latitude, longitude;
+    private String add;
+
+    NavigationView navigationView;
+    DrawerLayout drawerLayout;
 
     @Override
     public void onLocationChange(Location location){
@@ -76,10 +103,46 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mContext =this;
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("항만사고알리미");
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_24);
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
+        navigationView = findViewById(R.id.nav);
+        navigationView.setItemIconTintList(null);
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                switch (item.getItemId()) {
+                    case R.id.menu1:
+                        Toast.makeText(mContext, "지도",Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(intent);
+                    case R.id.menu2:
+                        Toast.makeText(mContext, "신고",Toast.LENGTH_LONG).show();
+                        Intent intent2 = new Intent(getApplicationContext(), ReportActivity.class);
+                        startActivity(intent2);
+                    case R.id.menu3:
+                        Toast.makeText(mContext, "통계",Toast.LENGTH_LONG).show();
+                        Intent intent3 = new Intent(getApplicationContext(), StatsActivity.class);
+                        startActivity(intent3);
+                }
+
+                drawerLayout.closeDrawer(navigationView);
+                return false;
+            }
+        });
+
+        mContext = this;
 
         ConstraintLayout mapViewLayout = (ConstraintLayout) findViewById(R.id.map_view_layout);
-        Button rp_btn =  (Button)findViewById(R.id.report_btn);
+        Button rp_btn = (Button)findViewById(R.id.report_btn);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -125,10 +188,17 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ReportActivity.class);
-                intent.putExtra("cur_latitude",currentPoint.getLatitude());
-                intent.putExtra("cur_longitude",currentPoint.getLongitude());
-                startActivity(intent);
+
+                Intent intent4 = new Intent(getApplicationContext(), ReportActivity.class);
+                try{
+                    intent4.putExtra("cur_latitude",currentPoint.getLatitude());
+                    Log.d("type", String.valueOf(currentPoint.getLatitude()));
+                    intent4.putExtra("cur_longitude",currentPoint.getLongitude());
+                    startActivity(intent4);
+                    //startActivityForResult(intent4, 1);
+                }catch (Exception e){
+                    Toast.makeText(getApplicationContext(),"현재위치를 인식할 때까지 기다려주세요.", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -412,5 +482,16 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:{ // 왼쪽 상단 버튼 눌렀을 때
+                drawerLayout.openDrawer(navigationView);
+                break;
 
+            }
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

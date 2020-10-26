@@ -9,18 +9,21 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.appcompat.widget.Toolbar;
 
-import com.android.volley.VolleyError;
 import com.skt.Tmap.TMapGpsManager;
 import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapView;
+
+import android.widget.RadioGroup;
+import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
+
+import com.android.volley.VolleyError;
 
 import org.json.JSONObject;
 import com.android.volley.RequestQueue;
@@ -45,11 +48,16 @@ public class ReportActivity extends AppCompatActivity {
     private String categoryId;
     private RadioGroup radioGroup;
     RequestQueue queue;
+    private Toolbar toolbar;
+    private double latitude, longitude;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.report_activity);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         Intent intent = getIntent();
         cur_latitude = intent.getExtras().getDouble("cur_latitude");
@@ -57,9 +65,18 @@ public class ReportActivity extends AppCompatActivity {
         currentPoint = new TMapPoint(cur_latitude, cur_longitude);
         //Log.d("넘겨받는 값", currentPoint.getLatitude()+", "+currentPoint.getLongitude());
 
+        /*
+        Intent intent = getIntent();
+        latitude = intent.getExtras().getDouble("cur_latitude");
+        longitude = intent.getExtras().getDouble("cur_longitude");
+        currentPoint = new TMapPoint(latitude, longitude);
+        Log.d("넘겨받는 값", currentPoint.getLatitude()+", "+currentPoint.getLongitude());
+        */
+
         ConstraintLayout mapViewLayout = (ConstraintLayout) findViewById(R.id.map_view_layout);
         Button confirmButton = (Button) findViewById(R.id.confirm_button);
         Button cancelButton = (Button) findViewById(R.id.cancel_button);
+
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
 
         tmapview = new TMapView(this);
@@ -160,6 +177,13 @@ public class ReportActivity extends AppCompatActivity {
                 reportRequest.setShouldCache(false);
                 queue = Volley.newRequestQueue(getApplicationContext());
                 queue.add(reportRequest);
+                /*
+                Intent intent = new Intent();
+                intent.putExtra("rep_latitude",reportPoint.getLatitude());
+                intent.putExtra("rep_longitude",reportPoint.getLongitude());
+                setResult(RESULT_OK, intent);
+                finish();
+                 */
             }
         });
 
