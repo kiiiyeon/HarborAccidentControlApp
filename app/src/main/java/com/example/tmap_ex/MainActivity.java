@@ -459,19 +459,31 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
 
                 if(state == 0){ //아무것도 감지되지 않음
-
+                    TMapPoint reportPoint = new TMapPoint(latitude, longitude);
+                    TMapMarkerItem markerItem = new TMapMarkerItem();
+                    markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
+                    markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
+                    markerItem.setCanShowCallout(true);
+                    markerItem.setCalloutTitle("해결됨");
+                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+                    Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.gas_safe);
+                    markerItem.setIcon(markerIcon);
+                    tmapview.addMarkerItem("marker"+i, markerItem); // 지도에 마커 추가
+                    arr.add(markerItem);
                 }
                 else{ //감지됨, 서클표시, 알람
                     TMapPoint reportPoint = new TMapPoint(latitude, longitude);
                     TMapMarkerItem markerItem = new TMapMarkerItem();
                     markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
                     markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
-                    tmapview.addMarkerItem("marker", markerItem); // 지도에 마커 추가
-                    markerItem.setID("marker"+i);
+                    markerItem.setCanShowCallout(true);
+                    markerItem.setCalloutTitle("가스유출 발생");
+                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+                    Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.gas_danger);
+                    //아이콘크기 줄이기
+                    markerItem.setIcon(markerIcon);
+                    tmapview.addMarkerItem("marker"+i, markerItem); // 지도에 마커 추가
                     arr.add(markerItem);
-                    tmapview.addMarkerItem("marker"+i, markerItem);
-
-                    //알림 함수
                 }
             }
 
