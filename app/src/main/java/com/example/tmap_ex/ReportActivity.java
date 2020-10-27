@@ -127,7 +127,7 @@ public class ReportActivity extends AppCompatActivity {
 
                 switch (item.getItemId()) {
                     case R.id.menu1:
-                        Toast.makeText(mContext, "지도",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "지도",Toast.LENGTH_LONG).show();
                         Intent intent1 = new Intent(getApplicationContext(), MainActivity.class);
                         intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         startActivity(intent1);
@@ -137,7 +137,7 @@ public class ReportActivity extends AppCompatActivity {
                         break;
 
                     case R.id.menu3:
-                        Toast.makeText(mContext, "통계",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "통계",Toast.LENGTH_LONG).show();
                         Intent intent3 = new Intent(getApplicationContext(), StatsActivity.class);
                         try{
                             intent3.putExtra("cur_latitude",latitude);
@@ -254,7 +254,7 @@ public class ReportActivity extends AppCompatActivity {
                 Response.ErrorListener errorListener = new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getApplicationContext(),"디비 처리시 에러발생!",Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(),"디비 처리시 에러발생!",Toast.LENGTH_SHORT).show();
                         Log.d("TAG", String.valueOf(error));
                         return;
                     }

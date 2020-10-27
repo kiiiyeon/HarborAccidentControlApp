@@ -1,18 +1,13 @@
 package com.example.tmap_ex;
 
 import android.content.Intent;
-<<<<<<< HEAD
 import android.os.AsyncTask;
-=======
->>>>>>> origin/report
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-<<<<<<< HEAD
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -30,14 +25,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import androidx.annotation.NonNull;
-=======
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONObject;
-
->>>>>>> origin/report
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;

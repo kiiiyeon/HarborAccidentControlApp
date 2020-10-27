@@ -5,29 +5,31 @@
     android:layout_width="match_parent"
     android:layout_height="200dp"
     android:background="#1E2B67"
-    android:gravity="bottom"
+    android:gravity="center_vertical"
     android:orientation="vertical"
+    android:layout_marginBottom="5dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="125dp"
-        android:layout_height="125dp"
-        android:layout_marginLeft="10dp"
-        android:src="@drawable/people" />
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:layout_marginLeft="94dp"
+        android:src="@drawable/face_icon" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="항만사고알리미"
-        android:layout_marginLeft="10dp"
+        android:text="아이디: 관리자"
+        android:layout_marginLeft="109dp"
+        android:layout_marginTop="10dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="74dp"
         android:text="근무 중 방심은 금물 입니다." />
 
 </LinearLayout>

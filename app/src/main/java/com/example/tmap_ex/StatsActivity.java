@@ -52,10 +52,8 @@ public class StatsActivity extends AppCompatActivity {
     private ActionBar actionBar;
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
     private static String mApiKey = "l7xx54970a28096b40faaf92b3017b524f8c";
     private TMapData tmapdata;
-    private TMapPoint tmappoint;
     private TMapPoint tMapPoint;
     private String address;
     private ListView reportListView;
@@ -100,14 +98,14 @@ public class StatsActivity extends AppCompatActivity {
 
                 switch (item.getItemId()) {
                     case R.id.menu1:
-                        Toast.makeText(mContext, "지도",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "지도",Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         startActivity(intent);
                         break;
 
                     case R.id.menu2:
-                        Toast.makeText(mContext, "신고",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "신고",Toast.LENGTH_LONG).show();
                         Intent intent1 = new Intent(getApplicationContext(), ReportActivity.class);
                         try{
                             intent1.putExtra("cur_latitude",latitude);

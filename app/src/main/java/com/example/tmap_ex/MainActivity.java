@@ -44,6 +44,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.skt.Tmap.TMapCircle;
 import com.skt.Tmap.TMapData;
 import com.skt.Tmap.TMapGpsManager;
@@ -65,6 +67,7 @@ import com.skt.Tmap.TMapView;
 import com.skt.Tmap.TmapAuthentication;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.LogManager;
 
 import org.json.JSONArray;
@@ -120,6 +123,13 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     private double latitude, longitude;
     private String add;
 
+    private String TAG = "TAGTOKEN";
+    private String token_id;
+    Map<String, String> map;
+    private RequestQueue tokenQueue;
+    private ArrayList<String> token_list = new ArrayList<String>();
+    String regToken;
+    String user_id;
 
     @Override
     public void onLocationChange(Location location){
@@ -137,6 +147,11 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
         Intent intent = getIntent();
         mContext = this;
+
+        FirebaseMessaging.getInstance().setAutoInitEnabled(true);
+        new TokenTask().execute();
+
+        user_id = SaveSharedPreference.getUserName(MainActivity.this);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -156,14 +171,14 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
                 switch (item.getItemId()) {
                     case R.id.menu1:
-                        Toast.makeText(mContext, "지도",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "지도",Toast.LENGTH_LONG).show();
                         Intent intent0 = new Intent(getApplicationContext(), MainActivity.class);
                         intent0.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         startActivity(intent0);
                         break;
 
                     case R.id.menu2:
-                        Toast.makeText(mContext, "신고",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "신고",Toast.LENGTH_LONG).show();
                         Intent intent1 = new Intent(getApplicationContext(), ReportActivity.class);
                         try{
                             intent1.putExtra("cur_latitude",currentPoint.getLatitude());
@@ -175,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                         }
                         break;
                     case R.id.menu3:
-                        Toast.makeText(mContext, "통계",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "통계",Toast.LENGTH_LONG).show();
                         Intent intent2 = new Intent(getApplicationContext(), StatsActivity.class);
                         try{
                             intent2.putExtra("cur_latitude",currentPoint.getLatitude());
@@ -217,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
             @Override
             public boolean onPressUpEvent(ArrayList<TMapMarkerItem> arrayList, ArrayList<TMapPOIItem> arrayList1, TMapPoint tMapPoint, PointF pointF) {
                 for (TMapMarkerItem item : arrayList) {
-                    Toast.makeText(getApplicationContext(), item.getID(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), item.getID(), Toast.LENGTH_SHORT).show();
                 }
                 Log.d("EndTest", "EndTest");
                 return false;
@@ -242,118 +257,121 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         tmapview.setTrackingMode(true);
         mapViewLayout.addView(tmapview);
 
-        tmapview.setOnCalloutRightButtonClickListener(new TMapView.OnCalloutRightButtonClickCallback(){
-            @Override
-            public void onCalloutRightButton(TMapMarkerItem tMapMarkerItem){
-                if(tMapMarkerItem.getID().charAt(0) == 'n' && tMapMarkerItem.getID().charAt(1) == 'r'){ //not solved report marker
-                    TMapPoint targetPoint = tMapMarkerItem.getTMapPoint();
-                    final TMapMarkerItem targetMarker = tMapMarkerItem;
-                    final double targetLatitude = targetPoint.getLatitude();
-                    final double targetLongitude = targetPoint.getLongitude();
-                    Log.d("TAG", ": " + tMapMarkerItem.getID() +" " + targetLatitude + " " + targetLongitude);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                    builder.setTitle("사고 처리 완료");
-                    builder.setMessage("완료하시겠습니까?");
-                    builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
-                            Response.Listener<String> responseListener = new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    try {
-                                        JSONObject jsonResponse = new JSONObject(response);
-                                        boolean success = jsonResponse.getBoolean("success");
-                                        if(success) {
-                                            //Toast.makeText(mContext, "성공", Toast.LENGTH_SHORT).show();
-                                            targetMarker.setCanShowCallout(false);
-                                            onStart();
+        if(user_id.equals("admin")){
+            tmapview.setOnCalloutRightButtonClickListener(new TMapView.OnCalloutRightButtonClickCallback(){
+                @Override
+                public void onCalloutRightButton(TMapMarkerItem tMapMarkerItem){
+                    if(tMapMarkerItem.getID().charAt(0) == 'n' && tMapMarkerItem.getID().charAt(1) == 'r'){ //not solved report marker
+                        TMapPoint targetPoint = tMapMarkerItem.getTMapPoint();
+                        final TMapMarkerItem targetMarker = tMapMarkerItem;
+                        final double targetLatitude = targetPoint.getLatitude();
+                        final double targetLongitude = targetPoint.getLongitude();
+                        Log.d("TAG", ": " + tMapMarkerItem.getID() +" " + targetLatitude + " " + targetLongitude);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle("사고 처리 완료");
+                        builder.setMessage("완료하시겠습니까?");
+                        builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
+                                Response.Listener<String> responseListener = new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        try {
+                                            JSONObject jsonResponse = new JSONObject(response);
+                                            boolean success = jsonResponse.getBoolean("success");
+                                            if(success) {
+                                                //Toast.makeText(mContext, "성공", Toast.LENGTH_SHORT).show();
+                                                targetMarker.setCanShowCallout(false);
+                                                onStart();
+                                            }
+                                            else {
+                                                Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
                                         }
-                                        else {
-                                            Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
-                                        }
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
                                     }
-                                }
-                            };
-                            Response.ErrorListener errorListener = new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Toast.makeText(getApplicationContext(),"에러발생",Toast.LENGTH_SHORT).show();
-                                    Log.d("TAG", String.valueOf(error));
-                                    return;
-                                }
-                            };
-                            StateUpdateRequest stateUpdateRequest = new StateUpdateRequest(Double.toString(targetLatitude), Double.toString(targetLongitude), responseListener, errorListener);
-                            RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
-                            queue.add(stateUpdateRequest);
-                        }
-                    });
-                    builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //Toast.makeText(getApplicationContext(),"아니오를 선택했습니다.",Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    builder.show();
-                }
+                                };
+                                Response.ErrorListener errorListener = new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        Toast.makeText(getApplicationContext(),"사고처리를 완료하지 못했습니다.",Toast.LENGTH_SHORT).show();
+                                        Log.d("TAG", String.valueOf(error));
+                                        return;
+                                    }
+                                };
+                                StateUpdateRequest stateUpdateRequest = new StateUpdateRequest(Double.toString(targetLatitude), Double.toString(targetLongitude), responseListener, errorListener);
+                                RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
+                                queue.add(stateUpdateRequest);
+                            }
+                        });
+                        builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //Toast.makeText(getApplicationContext(),"아니오를 선택했습니다.",Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        builder.show();
+                    }
 
-                if(tMapMarkerItem.getID().charAt(0) == 'd' && tMapMarkerItem.getID().charAt(1) == 'g'){ //detected gas marker
-                    TMapPoint targetPoint = tMapMarkerItem.getTMapPoint();
-                    final TMapMarkerItem targetMarker = tMapMarkerItem;
-                    final double targetLatitude = targetPoint.getLatitude();
-                    final double targetLongitude = targetPoint.getLongitude();
-                    Log.d("TAG", ": " + tMapMarkerItem.getID() +" " + targetLatitude + " " + targetLongitude);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                    builder.setTitle("가스누출사고 처리 완료");
-                    builder.setMessage("완료하시겠습니까?");
-                    builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
-                            Response.Listener<String> responseListener = new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    try {
-                                        JSONObject jsonResponse = new JSONObject(response);
-                                        boolean success = jsonResponse.getBoolean("success");
-                                        if(success) {
-                                            //Toast.makeText(mContext, "성공", Toast.LENGTH_SHORT).show();
-                                            targetMarker.setCanShowCallout(false);
-                                            onStart();
+                    if(tMapMarkerItem.getID().charAt(0) == 'd' && tMapMarkerItem.getID().charAt(1) == 'g'){ //detected gas marker
+                        TMapPoint targetPoint = tMapMarkerItem.getTMapPoint();
+                        final TMapMarkerItem targetMarker = tMapMarkerItem;
+                        final double targetLatitude = targetPoint.getLatitude();
+                        final double targetLongitude = targetPoint.getLongitude();
+                        Log.d("TAG", ": " + tMapMarkerItem.getID() +" " + targetLatitude + " " + targetLongitude);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle("가스누출사고 처리 완료");
+                        builder.setMessage("완료하시겠습니까?");
+                        builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
+                                Response.Listener<String> responseListener = new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        try {
+                                            JSONObject jsonResponse = new JSONObject(response);
+                                            boolean success = jsonResponse.getBoolean("success");
+                                            if(success) {
+                                                //Toast.makeText(mContext, "성공", Toast.LENGTH_SHORT).show();
+                                                targetMarker.setCanShowCallout(false);
+                                                onStart();
+                                            }
+                                            else {
+                                                Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
                                         }
-                                        else {
-                                            Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
-                                        }
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
                                     }
-                                }
-                            };
-                            Response.ErrorListener errorListener = new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Toast.makeText(getApplicationContext(),"에러발생",Toast.LENGTH_SHORT).show();
-                                    Log.d("TAG", String.valueOf(error));
-                                    return;
-                                }
-                            };
-                            GasUpdateRequest gasUpdateRequest = new GasUpdateRequest(Double.toString(targetLatitude), Double.toString(targetLongitude), responseListener, errorListener);
-                            RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
-                            queue.add(gasUpdateRequest);
-                        }
-                    });
-                    builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //Toast.makeText(getApplicationContext(),"아니오를 선택했습니다.",Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    builder.show();
+                                };
+                                Response.ErrorListener errorListener = new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        Toast.makeText(getApplicationContext(),"가스누출 처리를 완료하지 못했습니다.",Toast.LENGTH_SHORT).show();
+                                        Log.d("TAG", String.valueOf(error));
+                                        return;
+                                    }
+                                };
+                                GasUpdateRequest gasUpdateRequest = new GasUpdateRequest(Double.toString(targetLatitude), Double.toString(targetLongitude), responseListener, errorListener);
+                                RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
+                                queue.add(gasUpdateRequest);
+                            }
+                        });
+                        builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //Toast.makeText(getApplicationContext(),"아니오를 선택했습니다.",Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        builder.show();
+                    }
                 }
-            }
-        });
+            });
+
+        }
 
         rp_btn.setOnClickListener(new View.OnClickListener(){
 
@@ -728,6 +746,11 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                     markerItem.setCalloutRightButtonImage(markerIcon);
                     tmapview.addMarkerItem("dgas"+i, markerItem); // 지도에 마커 추가 detected gas marker
                     arr.add(markerItem);
+
+                    for(int count = 0; count < token_list.size(); count++){
+                        Log.d("token_list",token_list.get(count));
+                        SendNotification.sendNotification(token_list.get(count), "사고가 발생했습니다!!!", "사고지역을 확인해주세요.");
+                    }
                 }
             }
 
@@ -736,6 +759,84 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
             Log.d("gasValue", "gasShowResult : ", e);
         }
 
+    }
+
+    class TokenTask extends AsyncTask<Void, Void, String> {
+
+        String target;
+
+        @Override
+        protected  void onPreExecute() {
+            try {
+                target = "http://ec2-18-216-239-216.us-east-2.compute.amazonaws.com/token_request.php";
+                Log.d(TAG,"try");
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG,"catch");
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            try {
+                token_list.clear();
+
+                JSONObject jsonObject = new JSONObject(result);
+                JSONArray jsonArray = jsonObject.getJSONArray("response");
+                int count = 0;
+
+                String user_id;
+                String user_pwd;
+                String user_token;
+
+                while(count < jsonArray.length()) {
+                    JSONObject object = jsonArray.getJSONObject(count);
+                    user_token = object.getString("user_token");
+
+                    token_list.add(user_token);
+                    count++;
+                }
+                Log.d("size", String.valueOf(token_list.size()));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG,"catch2");
+            }
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+
+            try {
+                URL url = new URL(target);
+                HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
+
+                InputStream inputStream = httpURLConnection.getInputStream();
+
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                String temp;
+
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while((temp = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(temp+"\n");
+                }
+
+                bufferedReader.close();
+                inputStream.close();
+                httpURLConnection.disconnect();
+                return stringBuilder.toString().trim();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
     }
 
     @Override
