@@ -24,6 +24,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import com.skt.Tmap.TMapData;
 import com.skt.Tmap.TMapPoint;
 
@@ -31,6 +34,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -43,12 +47,12 @@ import java.util.List;
 import java.util.Locale;
 
 public class StatsActivity extends AppCompatActivity {
-
     private Context mContext = null;
     private Toolbar toolbar;
     private ActionBar actionBar;
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
+    private Toolbar toolbar;
     private static String mApiKey = "l7xx54970a28096b40faaf92b3017b524f8c";
     private TMapData tmapdata;
     private TMapPoint tmappoint;
@@ -125,7 +129,6 @@ public class StatsActivity extends AppCompatActivity {
             }
         });
 
-
         mContext =this;
 
         new BackgroundTask().execute();
@@ -135,7 +138,6 @@ public class StatsActivity extends AppCompatActivity {
 
         tMapPoint = new TMapPoint(37.545955, 126.964676);
         tmapdata = new TMapData();
-
 
         // 캘린더뷰
         calendarView = (CalendarView) findViewById(R.id.simple_calendarview);
@@ -260,7 +262,6 @@ public class StatsActivity extends AppCompatActivity {
                         Log.d("georesult: ","fail");
                     }
 
-
                     Report_item_list report_item_list = new Report_item_list(category_image, report_category, address, report_date, report_state,resolved_date);
                     list_itemArrayList.add(report_item_list);
                     if(Today.equals(report_date.substring(0,10))){
@@ -308,7 +309,7 @@ public class StatsActivity extends AppCompatActivity {
                             }
                             count++;
                         }
-                        reportItemListAdapter = new ReportItemListAdapter(getApplicationContext(), newList_itemArrayList);
+                        reportItemListAdapter = new ReportItemListAdapter(StatsActivity.this, newList_itemArrayList);
                         reportListView.setAdapter(reportItemListAdapter);
                         //noReport.setText("신고된 사고가 없습니다.");
                         if(newList_itemArrayList.size()==0) {
@@ -362,7 +363,6 @@ public class StatsActivity extends AppCompatActivity {
             super.onProgressUpdate(values);
         }
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){

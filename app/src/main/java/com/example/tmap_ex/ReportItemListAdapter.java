@@ -1,7 +1,6 @@
 package com.example.tmap_ex;
 
 import android.content.Context;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.graphics.Color;
@@ -26,7 +25,6 @@ public class ReportItemListAdapter extends BaseAdapter {
         TextView state_textView;
         TextView resolved_date_textView;
     }
-
     public ReportItemListAdapter(Context context, ArrayList<Report_item_list> list_itemArrayList) {
         this.context = context;
         this.list_itemArrayList = list_itemArrayList;
@@ -87,4 +85,3 @@ public class ReportItemListAdapter extends BaseAdapter {
     }
 
 }
-

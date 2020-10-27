@@ -6,6 +6,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -25,8 +27,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
-
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -60,7 +60,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ReportActivity extends AppCompatActivity {
 
@@ -264,13 +265,6 @@ public class ReportActivity extends AppCompatActivity {
                 reportRequest.setShouldCache(false);
                 queue = Volley.newRequestQueue(getApplicationContext());
                 queue.add(reportRequest);
-                /*
-                Intent intent = new Intent();
-                intent.putExtra("rep_latitude",reportPoint.getLatitude());
-                intent.putExtra("rep_longitude",reportPoint.getLongitude());
-                setResult(RESULT_OK, intent);
-                finish();
-                 */
                 for(int count = 0; count < token_list.size(); count++){
                     Log.d("token_list",token_list.get(count));
                     SendNotification.sendNotification(token_list.get(count), "사고가 발생했습니다!!!", "사고지역을 확인해주세요.");

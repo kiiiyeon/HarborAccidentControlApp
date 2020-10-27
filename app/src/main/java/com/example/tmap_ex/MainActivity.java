@@ -17,6 +17,11 @@ import android.location.LocationManager;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.Manifest;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -39,13 +44,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.skt.Tmap.TMapCircle;
 import com.skt.Tmap.TMapData;
 import com.skt.Tmap.TMapGpsManager;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.skt.Tmap.TMapCircle;
 import com.skt.Tmap.TMapGpsManager;
@@ -92,7 +100,6 @@ import com.skt.Tmap.TMapGpsManager;
 import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapView;
 
-
 public class MainActivity extends AppCompatActivity implements TMapGpsManager.onLocationChangedCallback {
 
     private Context mContext = null;
@@ -104,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     private TMapGpsManager tmapgps = null;
     private TMapView tmapview = null;
     private TMapPoint currentPoint = null;
-
     private static String mApiKey = "l7xx54970a28096b40faaf92b3017b524f8c";
     private static int mMarkerID;
     private String mJsonString;
@@ -130,11 +136,13 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         setContentView(R.layout.activity_main);
 
         Intent intent = getIntent();
+        mContext = this;
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("항만사고알리미");
         actionBar = getSupportActionBar();
+
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_24);
 
@@ -184,8 +192,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
             }
         });
 
-        mContext = this;
-
         ConstraintLayout mapViewLayout = (ConstraintLayout) findViewById(R.id.map_view_layout);
         Button rp_btn = (Button)findViewById(R.id.report_btn);
 
@@ -202,7 +208,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         tmapview.setZoomLevel(18);
         tmapview.setMapType(TMapView.MAPTYPE_STANDARD);
         tmapview.setLanguage(TMapView.LANGUAGE_KOREAN);
-
         tmapview.setOnClickListenerCallBack(new TMapView.OnClickListenerCallback() {
             @Override
             public boolean onPressEvent(ArrayList<TMapMarkerItem> arrayList, ArrayList<TMapPOIItem> arrayList1, TMapPoint tMapPoint, PointF pointF) {
@@ -234,13 +239,127 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         }
         tmapgps.OpenGps();
 
-
         tmapview.setTrackingMode(true);
         mapViewLayout.addView(tmapview);
 
+        tmapview.setOnCalloutRightButtonClickListener(new TMapView.OnCalloutRightButtonClickCallback(){
+            @Override
+            public void onCalloutRightButton(TMapMarkerItem tMapMarkerItem){
+                if(tMapMarkerItem.getID().charAt(0) == 'n' && tMapMarkerItem.getID().charAt(1) == 'r'){ //not solved report marker
+                    TMapPoint targetPoint = tMapMarkerItem.getTMapPoint();
+                    final TMapMarkerItem targetMarker = tMapMarkerItem;
+                    final double targetLatitude = targetPoint.getLatitude();
+                    final double targetLongitude = targetPoint.getLongitude();
+                    Log.d("TAG", ": " + tMapMarkerItem.getID() +" " + targetLatitude + " " + targetLongitude);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setTitle("사고 처리 완료");
+                    builder.setMessage("완료하시겠습니까?");
+                    builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
+                            Response.Listener<String> responseListener = new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    try {
+                                        JSONObject jsonResponse = new JSONObject(response);
+                                        boolean success = jsonResponse.getBoolean("success");
+                                        if(success) {
+                                            //Toast.makeText(mContext, "성공", Toast.LENGTH_SHORT).show();
+                                            targetMarker.setCanShowCallout(false);
+                                            onStart();
+                                        }
+                                        else {
+                                            Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            };
+                            Response.ErrorListener errorListener = new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(getApplicationContext(),"에러발생",Toast.LENGTH_SHORT).show();
+                                    Log.d("TAG", String.valueOf(error));
+                                    return;
+                                }
+                            };
+                            StateUpdateRequest stateUpdateRequest = new StateUpdateRequest(Double.toString(targetLatitude), Double.toString(targetLongitude), responseListener, errorListener);
+                            RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
+                            queue.add(stateUpdateRequest);
+                        }
+                    });
+                    builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Toast.makeText(getApplicationContext(),"아니오를 선택했습니다.",Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    builder.show();
+                }
+
+                if(tMapMarkerItem.getID().charAt(0) == 'd' && tMapMarkerItem.getID().charAt(1) == 'g'){ //detected gas marker
+                    TMapPoint targetPoint = tMapMarkerItem.getTMapPoint();
+                    final TMapMarkerItem targetMarker = tMapMarkerItem;
+                    final double targetLatitude = targetPoint.getLatitude();
+                    final double targetLongitude = targetPoint.getLongitude();
+                    Log.d("TAG", ": " + tMapMarkerItem.getID() +" " + targetLatitude + " " + targetLongitude);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setTitle("가스누출사고 처리 완료");
+                    builder.setMessage("완료하시겠습니까?");
+                    builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
+                            Response.Listener<String> responseListener = new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    try {
+                                        JSONObject jsonResponse = new JSONObject(response);
+                                        boolean success = jsonResponse.getBoolean("success");
+                                        if(success) {
+                                            //Toast.makeText(mContext, "성공", Toast.LENGTH_SHORT).show();
+                                            targetMarker.setCanShowCallout(false);
+                                            onStart();
+                                        }
+                                        else {
+                                            Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            };
+                            Response.ErrorListener errorListener = new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(getApplicationContext(),"에러발생",Toast.LENGTH_SHORT).show();
+                                    Log.d("TAG", String.valueOf(error));
+                                    return;
+                                }
+                            };
+                            GasUpdateRequest gasUpdateRequest = new GasUpdateRequest(Double.toString(targetLatitude), Double.toString(targetLongitude), responseListener, errorListener);
+                            RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
+                            queue.add(gasUpdateRequest);
+                        }
+                    });
+                    builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Toast.makeText(getApplicationContext(),"아니오를 선택했습니다.",Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    builder.show();
+                }
+            }
+        });
+
         rp_btn.setOnClickListener(new View.OnClickListener(){
+
             @Override
             public void onClick(View v) {
+
                 Intent intent4 = new Intent(getApplicationContext(), ReportActivity.class);
                 try{
                     intent4.putExtra("cur_latitude",currentPoint.getLatitude());
@@ -248,7 +367,9 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                     intent4.putExtra("cur_longitude",currentPoint.getLongitude());
                     startActivity(intent4);
                 }catch (Exception e){
+
                     Toast.makeText(getApplicationContext(),"현위치를 인식하는 중 입니다", Toast.LENGTH_LONG).show();
+
                 }
             }
         });
@@ -257,7 +378,9 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     @Override
     protected void onStart() {
         super.onStart();
-
+        if(arr != null){
+            tmapview.removeAllMarkerItem();
+        }
         GetData task = new GetData();
         task.execute("http://ec2-18-216-239-216.us-east-2.compute.amazonaws.com/ReportPointsRequest.php");
         GetGasData gasTask = new GetGasData();
@@ -448,29 +571,74 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
     private void showResult(){
         try {
+            Log.d("TAG", "showresult시작");
             JSONObject jsonObject = new JSONObject(mJsonString);
             JSONArray jsonArray = jsonObject.getJSONArray(TAG_JSON);
 
             for(int i=0;i<jsonArray.length();i++){
-
                 JSONObject item = jsonArray.getJSONObject(i);
 
                 double latitude = Double.parseDouble(item.getString("latitude"));
                 double longitude = Double.parseDouble(item.getString("longitude"));
                 int state = Integer.parseInt(item.getString("state"));
+                String category = item.getString("category");
                 if(state == 0){ //처리중
                     TMapPoint reportPoint = new TMapPoint(latitude, longitude);
                     TMapMarkerItem markerItem = new TMapMarkerItem();
                     markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
                     markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
                     markerItem.setCanShowCallout(true);
-                    markerItem.setCalloutTitle("처리중");
-                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+
+                    markerItem.setCalloutSubTitle("처리중");
+
                     Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.red_marker);
                     markerItem.setIcon(markerIcon);
-                    tmapview.addMarkerItem("marker"+i, markerItem); // 지도에 마커 추가
-                    markerItem.setID("marker"+i);
+
+                    if (category.equals("1")) {
+                        markerItem.setCalloutTitle("근로자 추락");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_1);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("2")) {
+                        markerItem.setCalloutTitle("화물 낙하");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_2);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("3")) {
+                        markerItem.setCalloutTitle("협착 사고");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_3);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("4")) {
+                        markerItem.setCalloutTitle("화재 사고");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_4);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("5")) {
+                        markerItem.setCalloutTitle("가스누출 사고");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_5);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("6")) {
+                        markerItem.setCalloutTitle("교통 사고");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_6);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("7")) {
+                        markerItem.setCalloutTitle("기타");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_7);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    tmapview.addMarkerItem("nreport"+i, markerItem); // 지도에 마커 추가 not solved
                     arr.add(markerItem);
+
                 }
                 else{ //해결됨
                     TMapPoint reportPoint = new TMapPoint(latitude, longitude);
@@ -478,11 +646,35 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                     markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
                     markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
                     markerItem.setCanShowCallout(true);
-                    markerItem.setCalloutTitle("해결됨");
-                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+
+                    if (category.equals("1"))
+                        markerItem.setCalloutTitle("근로자 추락");
+
+                    else if (category.equals("2"))
+                        markerItem.setCalloutTitle("화물 낙하");
+
+                    else if (category.equals("3"))
+                        markerItem.setCalloutTitle("협착 사고");
+
+                    else if (category.equals("4"))
+                        markerItem.setCalloutTitle("화재 사고");
+
+                    else if (category.equals("5"))
+                        markerItem.setCalloutTitle("가스누출 사고");
+
+                    else if (category.equals("6"))
+                        markerItem.setCalloutTitle("교통 사고");
+
+                    else if (category.equals("7"))
+                        markerItem.setCalloutTitle("기타");
+
+                    markerItem.setCalloutSubTitle("해결됨");
                     Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.blue_marker);
                     markerItem.setIcon(markerIcon);
-                    tmapview.addMarkerItem("marker"+i, markerItem); // 지도에 마커 추가
+
+                    Bitmap ok = BitmapFactory.decodeResource(getResources(), R.drawable.icx_ok);
+                    markerItem.setCalloutRightButtonImage(ok);
+                    tmapview.addMarkerItem("sreport"+i, markerItem); // 지도에 마커 추가 solved
                     arr.add(markerItem);
                 }
             }
@@ -508,21 +700,34 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                 double longitude = Double.parseDouble(item.getString("longitude"));
                 int state = Integer.parseInt(item.getString("state"));
 
-
                 if(state == 0){ //아무것도 감지되지 않음
-
+                    TMapPoint reportPoint = new TMapPoint(latitude, longitude);
+                    TMapMarkerItem markerItem = new TMapMarkerItem();
+                    markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
+                    markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
+                    markerItem.setCanShowCallout(true);
+                    markerItem.setCalloutTitle(id + " 가스센서");
+                    markerItem.setCalloutSubTitle("정상 작동중");
+                    Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.gas_safe);
+                    markerItem.setIcon(markerIcon);
+                    markerItem.setCalloutRightButtonImage(markerIcon);
+                    tmapview.addMarkerItem("ngas"+i, markerItem); // 지도에 마커 추가 not detected gas marker
+                    arr.add(markerItem);
                 }
                 else{ //감지됨, 서클표시, 알람
                     TMapPoint reportPoint = new TMapPoint(latitude, longitude);
                     TMapMarkerItem markerItem = new TMapMarkerItem();
                     markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
                     markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
-                    tmapview.addMarkerItem("marker", markerItem); // 지도에 마커 추가
-                    markerItem.setID("marker"+i);
-                    arr.add(markerItem);
-                    tmapview.addMarkerItem("marker"+i, markerItem);
 
-                    //알림 함수
+                    markerItem.setCanShowCallout(true);
+                    markerItem.setCalloutTitle(id + " 가스센서");
+                    markerItem.setCalloutSubTitle("가스누출 감지됨");
+                    Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.gas_danger);
+                    markerItem.setIcon(markerIcon);
+                    markerItem.setCalloutRightButtonImage(markerIcon);
+                    tmapview.addMarkerItem("dgas"+i, markerItem); // 지도에 마커 추가 detected gas marker
+                    arr.add(markerItem);
                 }
             }
 
