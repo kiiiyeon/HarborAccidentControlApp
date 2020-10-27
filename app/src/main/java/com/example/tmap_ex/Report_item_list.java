@@ -9,11 +9,12 @@ public class Report_item_list {
     private String report_location;
     private String report_date;
     private String report_state;
+    private String resolved_date;
 
-    public Drawable getCategory_image() { return this.category_image; }
+    public Drawable getCategory_image() { return category_image; }
 
-    public void setCategory_image(Drawable image) {
-        this.category_image = image;
+    public void setCategory_image(Drawable category_image) {
+        this.category_image = category_image;
     }
 
     public String getReport_category() {
@@ -42,12 +43,21 @@ public class Report_item_list {
         this.report_state = report_state;
     }
 
-    public Report_item_list(Drawable category_image, String report_category, String report_location, String report_date, String report_state) {
+    public Report_item_list(Drawable category_image, String report_category, String report_location, String report_date, String report_state, String resolved_date) {
         this.category_image = category_image;
         this.report_category = report_category;
         this.report_location = report_location;
         this.report_date = report_date;
         this.report_state = report_state;
+        this.resolved_date = resolved_date;
+    }
+
+    public String getResolved_date() {
+        return resolved_date;
+    }
+
+    public void setResolved_date(String resolved_date) {
+        this.resolved_date = resolved_date;
     }
 }
 

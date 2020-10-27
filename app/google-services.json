@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "697578576098",
+    "firebase_url": "https://report-management-b572b.firebaseio.com",
+    "project_id": "report-management-b572b",
+    "storage_bucket": "report-management-b572b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:697578576098:android:ed99f1c5a6fe32d34426bb",
+        "android_client_info": {
+          "package_name": "com.example.tmap_ex"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "697578576098-dp5p8s2kgshjcj8l8vhin5r7t8fqrop8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeHhuA-DzeMBKsia84P_W1DdDxaADdm9U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "697578576098-dp5p8s2kgshjcj8l8vhin5r7t8fqrop8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

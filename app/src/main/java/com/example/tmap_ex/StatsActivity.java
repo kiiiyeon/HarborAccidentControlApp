@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.CalendarView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,13 +19,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import com.skt.Tmap.TMapData;
 import com.skt.Tmap.TMapPoint;
 
@@ -32,7 +31,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -154,10 +152,11 @@ public class StatsActivity extends AppCompatActivity {
 
         // 리스트뷰
         reportListView = (ListView)findViewById(R.id.report_listView);
+
         list_itemArrayList = new ArrayList<Report_item_list>();
         todayList_itemArrayList = new ArrayList<Report_item_list>();
         //reportItemListAdapter = new ReportItemListAdapter(StatsActivity.this,list_itemArrayList);
-        //reportListView.setAdapter(reportItemListAdapter);
+        //reportReclyclerView.setAdapter(reportItemListAdapter);
 
     }
 
@@ -190,6 +189,7 @@ public class StatsActivity extends AppCompatActivity {
                 String report_longitude;
                 String report_date;
                 String report_state;
+                String resolved_date;
 
                 while(count < jsonArray.length()) {
                     JSONObject object = jsonArray.getJSONObject(count);
@@ -201,6 +201,7 @@ public class StatsActivity extends AppCompatActivity {
                     report_date = object.getString("report_date");
                     Log.d("report_date:", report_date.substring(0,10));
                     report_state = object.getString("report_state");
+                    resolved_date = object.getString("resolved_date");
 
                     // category_image 지정
 
@@ -260,7 +261,7 @@ public class StatsActivity extends AppCompatActivity {
                     }
 
 
-                    Report_item_list report_item_list = new Report_item_list(category_image, report_category, address, report_date, report_state);
+                    Report_item_list report_item_list = new Report_item_list(category_image, report_category, address, report_date, report_state,resolved_date);
                     list_itemArrayList.add(report_item_list);
                     if(Today.equals(report_date.substring(0,10))){
                         todayList_itemArrayList.add(report_item_list);
@@ -268,6 +269,7 @@ public class StatsActivity extends AppCompatActivity {
                     count++;
                 }
                 Log.d("size:", String.valueOf(list_itemArrayList.size()));
+                // reportItemListAdapter = new ReportItemListAdapter(getApplicationContext(),list_itemArrayList);
                 reportItemListAdapter = new ReportItemListAdapter(StatsActivity.this, todayList_itemArrayList);
                 reportListView.setAdapter(reportItemListAdapter);
                 //reportItemListAdapter.notifyDataSetChanged();
@@ -306,7 +308,7 @@ public class StatsActivity extends AppCompatActivity {
                             }
                             count++;
                         }
-                        reportItemListAdapter = new ReportItemListAdapter(StatsActivity.this, newList_itemArrayList);
+                        reportItemListAdapter = new ReportItemListAdapter(getApplicationContext(), newList_itemArrayList);
                         reportListView.setAdapter(reportItemListAdapter);
                         //noReport.setText("신고된 사고가 없습니다.");
                         if(newList_itemArrayList.size()==0) {
