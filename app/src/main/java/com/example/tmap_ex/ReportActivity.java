@@ -63,15 +63,6 @@ public class ReportActivity extends AppCompatActivity {
         cur_latitude = intent.getExtras().getDouble("cur_latitude");
         cur_longitude = intent.getExtras().getDouble("cur_longitude");
         currentPoint = new TMapPoint(cur_latitude, cur_longitude);
-        //Log.d("넘겨받는 값", currentPoint.getLatitude()+", "+currentPoint.getLongitude());
-
-        /*
-        Intent intent = getIntent();
-        latitude = intent.getExtras().getDouble("cur_latitude");
-        longitude = intent.getExtras().getDouble("cur_longitude");
-        currentPoint = new TMapPoint(latitude, longitude);
-        Log.d("넘겨받는 값", currentPoint.getLatitude()+", "+currentPoint.getLongitude());
-        */
 
         ConstraintLayout mapViewLayout = (ConstraintLayout) findViewById(R.id.map_view_layout);
         Button confirmButton = (Button) findViewById(R.id.confirm_button);
@@ -177,13 +168,6 @@ public class ReportActivity extends AppCompatActivity {
                 reportRequest.setShouldCache(false);
                 queue = Volley.newRequestQueue(getApplicationContext());
                 queue.add(reportRequest);
-                /*
-                Intent intent = new Intent();
-                intent.putExtra("rep_latitude",reportPoint.getLatitude());
-                intent.putExtra("rep_longitude",reportPoint.getLongitude());
-                setResult(RESULT_OK, intent);
-                finish();
-                 */
             }
         });
 
