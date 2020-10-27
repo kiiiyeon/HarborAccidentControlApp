@@ -511,24 +511,62 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                 double longitude = Double.parseDouble(item.getString("longitude"));
                 int state = Integer.parseInt(item.getString("state"));
                 String category = item.getString("category");
-                Log.d("TAG", "latitude: " + latitude);
+
                 if(state == 0){ //처리중
                     TMapPoint reportPoint = new TMapPoint(latitude, longitude);
                     TMapMarkerItem markerItem = new TMapMarkerItem();
                     markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
                     markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
                     markerItem.setCanShowCallout(true);
-                    markerItem.setCalloutTitle("처리중");
-                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+                    markerItem.setCalloutSubTitle("처리중");
 
                     Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.red_marker);
                     markerItem.setIcon(markerIcon);
 
-                    markerItem.setCalloutRightButtonImage(markerIcon);
+                    if (category.equals("1")) {
+                        markerItem.setCalloutTitle("근로자 추락");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_1);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("2")) {
+                        markerItem.setCalloutTitle("화물 낙하");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_2);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("3")) {
+                        markerItem.setCalloutTitle("협착 사고");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_3);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("4")) {
+                        markerItem.setCalloutTitle("화재 사고");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_4);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("5")) {
+                        markerItem.setCalloutTitle("가스누출 사고");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_5);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("6")) {
+                        markerItem.setCalloutTitle("교통 사고");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_6);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
+
+                    if (category.equals("7")) {
+                        markerItem.setCalloutTitle("기타");
+                        Bitmap reportIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icx_7);
+                        markerItem.setCalloutRightButtonImage(reportIcon);//그림 바꿔주기
+                    }
 
                     tmapview.addMarkerItem("nreport"+i, markerItem); // 지도에 마커 추가 not solved
                     arr.add(markerItem);
-
 
                 }
                 else{ //해결됨
@@ -537,10 +575,33 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                     markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
                     markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
                     markerItem.setCanShowCallout(true);
-                    markerItem.setCalloutTitle("해결됨");
-                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+                    if (category.equals("1"))
+                        markerItem.setCalloutTitle("근로자 추락");
+
+                    else if (category.equals("2"))
+                        markerItem.setCalloutTitle("화물 낙하");
+
+                    else if (category.equals("3"))
+                        markerItem.setCalloutTitle("협착 사고");
+
+                    else if (category.equals("4"))
+                        markerItem.setCalloutTitle("화재 사고");
+
+                    else if (category.equals("5"))
+                        markerItem.setCalloutTitle("가스누출 사고");
+
+                    else if (category.equals("6"))
+                        markerItem.setCalloutTitle("교통 사고");
+
+                    else if (category.equals("7"))
+                        markerItem.setCalloutTitle("기타");
+
+                    markerItem.setCalloutSubTitle("해결됨");
                     Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.blue_marker);
                     markerItem.setIcon(markerIcon);
+
+                    Bitmap ok = BitmapFactory.decodeResource(getResources(), R.drawable.icx_ok);
+                    markerItem.setCalloutRightButtonImage(ok);
                     tmapview.addMarkerItem("sreport"+i, markerItem); // 지도에 마커 추가 solved
                     arr.add(markerItem);
                 }
@@ -573,11 +634,12 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                     markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
                     markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
                     markerItem.setCanShowCallout(true);
-                    markerItem.setCalloutTitle("해결됨");
-                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+                    markerItem.setCalloutTitle(id + " 가스센서");
+                    markerItem.setCalloutSubTitle("정상 작동중");
                     Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.gas_safe);
                     markerItem.setIcon(markerIcon);
-                    tmapview.addMarkerItem("ngas"+i, markerItem); // 지도에 마커 추가 not detected
+                    markerItem.setCalloutRightButtonImage(markerIcon);
+                    tmapview.addMarkerItem("ngas"+i, markerItem); // 지도에 마커 추가 not detected gas marker
                     arr.add(markerItem);
                 }
                 else{ //감지됨, 서클표시, 알람
@@ -586,12 +648,12 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                     markerItem.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
                     markerItem.setTMapPoint(reportPoint); // 마커의 좌표 지정
                     markerItem.setCanShowCallout(true);
-                    markerItem.setCalloutTitle("가스유출 발생");
-                    markerItem.setCalloutSubTitle("Hello. LBC World!");
+                    markerItem.setCalloutTitle(id + " 가스센서");
+                    markerItem.setCalloutSubTitle("가스누출 감지됨");
                     Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.gas_danger);
                     markerItem.setIcon(markerIcon);
                     markerItem.setCalloutRightButtonImage(markerIcon);
-                    tmapview.addMarkerItem("dgas"+i, markerItem); // 지도에 마커 추가 detected
+                    tmapview.addMarkerItem("dgas"+i, markerItem); // 지도에 마커 추가 detected gas marker
                     arr.add(markerItem);
                 }
             }
