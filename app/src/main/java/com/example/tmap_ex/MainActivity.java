@@ -4,8 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -28,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.skt.Tmap.TMapCircle;
 import com.skt.Tmap.TMapGpsManager;
@@ -164,10 +167,34 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                 return false;
             }
 
+
             @Override
             public boolean onPressUpEvent(ArrayList<TMapMarkerItem> arrayList, ArrayList<TMapPOIItem> arrayList1, TMapPoint tMapPoint, PointF pointF) {
                 for (TMapMarkerItem item : arrayList) {
-                    Toast.makeText(getApplicationContext(), item.getID(), Toast.LENGTH_SHORT).show();
+                    //다이얼로그
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("사고 처리 완료").setMessage("완료하시겠습니까?");
+                    builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            //StringRequest
+                            gasValueRequest(String id, int state, Response.Listener<String> lis)
+
+
+                        }
+                    });
+
+                    builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    });
+
+
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+
                 }
                 Log.d("EndTest", "EndTest");
                 return false;
@@ -495,3 +522,5 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         return super.onOptionsItemSelected(item);
     }
 }
+
+
