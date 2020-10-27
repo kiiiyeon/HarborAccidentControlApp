@@ -39,6 +39,8 @@ import androidx.appcompat.widget.Toolbar;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -840,13 +842,23 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu); //메뉴 XML파일 인플레이션
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:{ // 왼쪽 상단 버튼 눌렀을 때
                 drawerLayout.openDrawer(navigationView);
                 break;
             }
+            case R.id.refresh:
+                onStart();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
